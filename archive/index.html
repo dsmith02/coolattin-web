@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Irish Historical Estates</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-container">
+        <div class="logo">
+          <h1>Irish Historical Estates</h1>
+        </div>
+        <div class="nav-links">
+          <a href="javascript:void(0)" class="active" data-page="home">Home</a>
+          <a href="javascript:void(0)" data-page="map-page">Map</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section id="home" class="page active">
+        <div class="hero">
+          <h1>Discover Ireland's Historical Estates</h1>
+          <p>Explore the rich heritage of pre-independence Irish estates</p>
+        </div>
+        <div class="content-container">
+          <div class="feature-card">
+            <h2>Explore Historical Records</h2>
+            <p>
+              Dive into detailed tenant records and property information from
+              County Wicklow's historical estates.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h2>Interactive Mapping</h2>
+            <p>
+              Navigate through historical estate boundaries and discover
+              geographical patterns of land ownership.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h2>Rich Heritage</h2>
+            <p>
+              Uncover stories of land, people, and society in pre-independence
+              Ireland.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="map-page" class="page">
+        <div class="map-container">
+          <h2>Historical Estate Maps</h2>
+          <div id="map"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <p>© 2024 Irish Historical Estates Project</p>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
