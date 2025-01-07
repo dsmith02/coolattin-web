@@ -7,6 +7,9 @@ app = Flask(__name__)
 COOLATTIN_COORDS = [52.7535, -6.4898]
 json_data = None
 
+##################
+### APP ROUTES ###
+##################
 @app.route('/')
 def index():
     load_json_data()
@@ -17,10 +20,14 @@ def index():
 @app.route("/townlands/<name>")
 def townland(name):
     return render_template("townland.html", townland=name)
-    # if check_if_townland_exists(name):
-    #     return f"<h1>ERROR — TOWNLAND DOES NOT EXIST.</h1>"
-    # else:
-    #     return f"<h1>Townland of {name} details"
+
+@app.route("/browse")
+def browse():
+    return render_template("browse.html")
+
+########################
+### HELPER FUNCTIONS ###
+########################
 
 def check_if_townland_exists(name):
     for tn in json_data["features"]:
@@ -67,10 +74,6 @@ def load_json_data():
     json_path = "static/data/townlands.json"
     with open(json_path, encoding="utf-8") as f:
         json_data = json.load(f)
-
-@app.route("/browse")
-def browse():
-    return f"""<h1>Browse data</h1>"""
 
 if __name__ == '__main__':
     app.run(debug=True)
