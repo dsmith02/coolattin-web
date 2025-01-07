@@ -5,9 +5,8 @@ import folium
 import requests
 
 app = Flask(__name__)
-
 COOLATTIN_COORDS = [52.7535, -6.4898]
-
+json_data = None
 
 @app.route('/')
 def index():
@@ -17,14 +16,9 @@ def index():
         zoom_start=10)
     map.width = 500;
 
-    folium.Marker(COOLATTIN_COORDS, popup="Coolattin House", tooltip="Click me!").add_to(map)
+    folium.Marker(COOLATTIN_COORDS, popup="Coolattin House", tooltip="CLICK HERE FOR MORE!").add_to(map)
 
-    json_path = "static/data/townlands.json"
-    json_data = None
-
-    # Load the GeoJSON and add popups using TL_ENGLISH (townland name in English)
-    with open(json_path, encoding="utf-8") as f:
-        json_data = json.load(f)
+    load_json_data()
 
     folium.GeoJson(
         json_data,
@@ -40,7 +34,7 @@ def index():
             sticky=True
         ),
         style_function=lambda feature: {
-            "fillColor": "red",  # Default fill color for polygons
+            "fillColor": "#7fd4db",  # Default fill color for polygons
             "color": "black",  # Outline color
             "weight": 1.5,  # Border thickness
             "fillOpacity": 0.4  # Transparency of fill color
@@ -53,11 +47,30 @@ def index():
 
     return render_template("index.html", map_html=map_to_html)
 
+@app.route("/townlands/<name>")
+def townland(name):
+    return render_template("townland.html", townland=name)
+    # if check_if_townland_exists(name):
+    #     return f"<h1>ERROR — TOWNLAND DOES NOT EXIST.</h1>"
+    # else:
+    #     return f"<h1>Townland of {name} details"
+
+def check_if_townland_exists(name):
+    for tn in json_data["features"]:
+        if name == tn:
+            return True
+    return False
+
+# Loads the geographical JSON data for townlands
+def load_json_data():
+    global json_data
+    json_path = "static/data/townlands.json"
+    with open(json_path, encoding="utf-8") as f:
+        json_data = json.load(f)
 
 @app.route("/browse")
 def browse():
-    return f"""<h1>HELLO</h1>"""
-
+    return f"""<h1>Browse data</h1>"""
 
 if __name__ == '__main__':
     app.run(debug=True)
