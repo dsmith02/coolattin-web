@@ -10,6 +10,27 @@ json_data = None
 
 @app.route('/')
 def index():
+    load_json_data()
+    map = create_map()
+    map_html = map._repr_html_()
+    return render_template("index.html", map_html=map_html)
+
+@app.route("/townlands/<name>")
+def townland(name):
+    return render_template("townland.html", townland=name)
+    # if check_if_townland_exists(name):
+    #     return f"<h1>ERROR — TOWNLAND DOES NOT EXIST.</h1>"
+    # else:
+    #     return f"<h1>Townland of {name} details"
+
+def check_if_townland_exists(name):
+    for tn in json_data["features"]:
+        if name == tn:
+            return True
+    return False
+
+# Create map
+def create_map():
     map = folium.Map(
         location=COOLATTIN_COORDS,
         prefer_canvas=True,
@@ -17,8 +38,6 @@ def index():
     map.width = 500;
 
     folium.Marker(COOLATTIN_COORDS, popup="Coolattin House", tooltip="CLICK HERE FOR MORE!").add_to(map)
-
-    load_json_data()
 
     folium.GeoJson(
         json_data,
@@ -41,25 +60,7 @@ def index():
         },
         zoom_on_click=True
     ).add_to(map)
-
-    # Generate the map HTML
-    map_to_html = map._repr_html_()
-
-    return render_template("index.html", map_html=map_to_html)
-
-@app.route("/townlands/<name>")
-def townland(name):
-    return render_template("townland.html", townland=name)
-    # if check_if_townland_exists(name):
-    #     return f"<h1>ERROR — TOWNLAND DOES NOT EXIST.</h1>"
-    # else:
-    #     return f"<h1>Townland of {name} details"
-
-def check_if_townland_exists(name):
-    for tn in json_data["features"]:
-        if name == tn:
-            return True
-    return False
+    return map
 
 # Loads the geographical JSON data for townlands
 def load_json_data():
