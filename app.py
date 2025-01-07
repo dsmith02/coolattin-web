@@ -2,7 +2,6 @@ import json
 
 from flask import Flask, render_template
 import folium
-import requests
 
 app = Flask(__name__)
 COOLATTIN_COORDS = [52.7535, -6.4898]
