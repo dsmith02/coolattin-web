@@ -64,7 +64,7 @@ def create_map():
             "weight": 1.5,  # Border thickness
             "fillOpacity": 0.4  # Transparency of fill color
         },
-        zoom_on_click=True
+        zoom_on_click=False
     ).add_to(map)
     return map
 
