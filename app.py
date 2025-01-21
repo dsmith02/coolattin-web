@@ -45,12 +45,17 @@ def create_map():
 
     folium.Marker(COOLATTIN_COORDS, popup="Coolattin House", tooltip="CLICK HERE FOR MORE!").add_to(map)
 
+    for feature in json_data["features"]:
+        name_english = feature["properties"]["TL_ENGLISH"]
+        link = f'<a href="/townlands/{name_english.replace(" ", "-").capitalize()}" target="_blank">More details</a>'
+        feature["properties"]["TL_URL"] = link  # Add the link as a new property
+
     folium.GeoJson(
         json_data,
         name="Townlands",
         popup=folium.GeoJsonPopup(
-            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868"],  # Display these properties
-            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):"],  # Labels
+            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868", "TL_URL"],  # Display these properties
+            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):", ""],  # Labels
             localize=True  # Automatically format numbers if needed
         ),
         tooltip=folium.GeoJsonTooltip(
@@ -66,6 +71,7 @@ def create_map():
         },
         zoom_on_click=False
     ).add_to(map)
+
     return map
 
 # Loads the geographical JSON data for townlands
