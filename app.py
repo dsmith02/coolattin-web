@@ -31,7 +31,10 @@ def index():
 
 @app.route("/townlands/<name>")
 def townland(name):
-    return render_template("townland.html", townland=name, map_html=create_map_by_townland(name)._repr_html_())
+    if get_townland_geojson(name) is None:
+        return render_template("townland_not_found.html", townland=name)
+    else:
+        return render_template("townland.html", townland=name, map_html=create_map_by_townland(name)._repr_html_())
 
 
 @app.route("/browse")
