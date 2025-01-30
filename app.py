@@ -2,6 +2,7 @@ import json
 
 from flask import Flask, render_template
 import folium
+import pandas as pd
 
 json_data = None
 
@@ -16,6 +17,8 @@ def load_json_data():
 
 app = Flask(__name__)
 load_json_data()
+
+# Folium takes the latitude (y-axis) then the longitude (x-axis)
 COOLATTIN_COORDS = [52.7535, -6.4898]
 
 
@@ -28,19 +31,20 @@ def index():
     map_html = map._repr_html_()
     return render_template("index.html", map_html=map_html)
 
-
+"""
+Loads an individual townland's page. Checks that the townland is contained within the GeoJSON, if not, it returns a blank error page. Otherwise loads the page and map.
+"""
 @app.route("/townlands/<name>")
 def townland(name):
+    name = name.title()
     if get_townland_geojson(name) is None:
         return render_template("townland_not_found.html", townland=name)
     else:
-        return render_template("townland.html", townland=name, map_html=create_map_by_townland(name)._repr_html_())
-
+        return render_template("townland.html", townland=name.title(), townland_vrti_link=get_vrti_link(name), tenancies=get_records_for_townland(name), map_html=create_map_by_townland(name)._repr_html_())
 
 @app.route("/browse")
 def browse():
     return render_template("browse.html")
-
 
 @app.route("/about")
 def about():
@@ -63,7 +67,7 @@ def create_map():
 
     for feature in json_data["features"]:
         name_english = feature["properties"]["TL_ENGLISH"]
-        link = f'<a href="/townlands/{name_english.replace(" ", "-").capitalize()}" target="_blank">More details</a>'
+        link = f'<a href="/townlands/{name_english.title()}" target="_blank">More details</a>'
         feature["properties"]["TL_URL"] = link  # Add the link as a new property
 
     folium.GeoJson(
@@ -90,9 +94,12 @@ def create_map():
 
     return map
 
+
 """
 Gets the townlands geojson data
 """
+
+
 def get_townland_geojson(townland_name):
     tl_gjson = None
     for x in json_data["features"]:
@@ -103,15 +110,9 @@ def get_townland_geojson(townland_name):
             }
     return tl_gjson
 
-def create_map_by_townland(townland_name):
-    tl_gjson = None
-    for x in json_data["features"]:
-        if x["properties"]["TL_ENGLISH"] == townland_name.upper():
 
-            tl_gjson = {
-                "type": "FeatureCollection",
-                "features": [x]
-            }
+def create_map_by_townland(townland_name):
+    tl_gjson = get_townland_geojson(townland_name)
 
     if tl_gjson is None:
         map = folium.Map(
@@ -122,11 +123,22 @@ def create_map_by_townland(townland_name):
         folium.Marker(COOLATTIN_COORDS, popup="Coolattin House").add_to(map)
         return map
 
-    print(tl_gjson)
+    # Centroid = ( SUM OF X-VALUES / N, SUM OF Y-VALUES / N), where N = total number of vertices i.e. no. of X, Y pairs
+    # https://www.omnicalculator.com/math/centroid
+    # n = tl_gjson["features"][0]["geometry"]["coordinates"][0][0][0]
+    # print(f"N = {n}")
+    lon_sum = 0
+    lat_sum = 0
+    for coord in tl_gjson["features"][0]["geometry"]["coordinates"][0]:
+        lon_sum += coord[0]
+        lat_sum += coord[1]
+    centroid_x = lon_sum / len(tl_gjson["features"][0]["geometry"]["coordinates"][0])
+    centroid_y = lat_sum / len(tl_gjson["features"][0]["geometry"]["coordinates"][0])
+
     map = folium.Map(
-        location=COOLATTIN_COORDS,
+        location=[centroid_y, centroid_x],
         prefer_canvas=True,
-        zoom_start=10)
+        zoom_start=12)
     map.width = 500
 
     folium.GeoJson(
@@ -152,3 +164,15 @@ def create_map_by_townland(townland_name):
     ).add_to(map)
 
     return map
+
+def get_vrti_link(townland):
+    townlands = pd.read_csv("static/data/official-aligned.csv")
+    for index, row in townlands.iterrows():
+        if row.iloc[0] == townland:
+            return row.iloc[1]
+    return None
+
+def get_records_for_townland(townland):
+    records = pd.read_csv("static/data/tenants-merged-test.csv")
+    townland_records = records[records["townland"].str.strip().str.lower() == townland.lower()]
+    return townland_records.to_dict(orient="records")

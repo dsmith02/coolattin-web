@@ -12,12 +12,13 @@
             <div class="border border-dark border-2" id="map">
                 {{ map_html | safe }}
             </div>
+            <a class="btn btn-primary w-100 mt-3" href="{{ townland_vrti_link }}" role="button">View in VRTI</a>
         </div>
     </div>
 
 
     <!-- Tab Navigation -->
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
             <a aria-controls="tenancies" aria-selected="true" class="nav-link active" data-bs-toggle="tab"
                href="#tenancies"
@@ -51,27 +52,16 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% for record in tenancies %}
                 <tr>
-                    <td>Diarmuid</td>
-                    <td>Smith</td>
-                    <td>45</td>
-                    <td>Farmer</td>
-                    <td>{{ townland }}</td>
+                    <!-- id,nli_ref,year,month,session,vol,page,estate_ref,estate,townland,townland_official,civil_parish,surname,forename,emigration_househol,surname_tenant_chief,forename_tenant_chief,surname_undertenant,forename_undertenant,legal_action,occupation,age,age_husband,age_wife,gender,acres_irish,acres_english,no_sons,no_daughters,no_servants_male,no_servants_female,other_males,other_females,relation_to_head,rent_owed,arrears,ship_name,place_date_departure,place_date_arrival,estate_holding,comments -->
+                    <td>{{ record["forename"] }}</td>
+                    <td>{{ record["surname"] }}</td>
+                    <td>{{ record["age"] }}</td>
+                    <td>{{ record["occupation"] }}</td>
+                    <td>{{ record["townland"] }}</td>
                 </tr>
-                <tr>
-                    <td>Ursula</td>
-                    <td>Smith</td>
-                    <td>38</td>
-                    <td>Teacher</td>
-                    <td>{{ townland }}</td>
-                </tr>
-                <tr>
-                    <td>Peter</td>
-                    <td>Smith</td>
-                    <td>50</td>
-                    <td>Carpenter</td>
-                    <td>{{ townland }}</td>
-                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
