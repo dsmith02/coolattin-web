@@ -1,11 +1,11 @@
+import io
 import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file
 import folium
 import pandas as pd
 
 json_data = None
-
 
 # Loads the geographical JSON data for townlands
 def load_json_data():
@@ -42,6 +42,20 @@ def townland(name):
     else:
         return render_template("townland.html", townland=name.title(), townland_vrti_link=get_vrti_link(name), tenancies=get_records_for_townland(name), map_html=create_map_by_townland(name)._repr_html_())
 
+@app.route("/export/<townland>")
+def extract_townland_records(townland):
+    df = pd.read_csv("static/data/tenants-merged-test.csv")
+    extracted_records = df[df["townland"].str.strip().str.lower() == townland.strip().lower()]
+
+    output = io.StringIO()
+    extracted_records.to_csv(output, index=False)
+
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),  # Convert to bytes
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f"{townland}_extracted.csv"
+    )
 @app.route("/browse")
 def browse():
     return render_template("browse.html")
@@ -98,8 +112,6 @@ def create_map():
 """
 Gets the townlands geojson data
 """
-
-
 def get_townland_geojson(townland_name):
     tl_gjson = None
     for x in json_data["features"]:

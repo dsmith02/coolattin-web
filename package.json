@@ -1,0 +1,17 @@
+{
+  "name": "coolattin-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dsmith02/coolattin-web.git"
+  },
+  "private": true,
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}

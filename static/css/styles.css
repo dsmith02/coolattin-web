@@ -2,3 +2,24 @@
     height: 100%;
     width: 100%;
 }
+
+body {
+    font-family: 'Noto Sans`', sans-serif;
+}
+
+/* Style for the result rectangles */
+.result-rectangle {
+    width: 100%; /* Full width of the container */
+    padding: 10px; /* Padding inside each rectangle */
+    border: 1px solid #ccc; /* Border for each rectangle */
+    background-color: #f9f9f9; /* Background color */
+    font-size: 1rem; /* Font size */
+    text-align: left; /* Align text to the left */
+    text-transform: capitalize; /* Ensure text is in title case */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    margin: 0; /* Remove margin to ensure rectangles touch */
+}
+
+.result-rectangle:hover {
+    background-color: #e9e9e9; /* Change background color on hover */
+}
