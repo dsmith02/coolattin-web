@@ -1,18 +1,17 @@
 let townlands = [];
 
-fetch('static/data/townlands.json')
+fetch("static/data/townlands.json")
     .then(response => response.json())
     .then(data => {
         townlands = data.features.map(feature => feature.properties.TL_ENGLISH);
     })
-    .catch(error => console.error('Error fetching townlands:', error));
+    .catch(error => console.error("Error fetching townlands:", error));
 
 function filterTownlands() {
     const searchBar = document.getElementById("search-bar");
     const suggestions = document.getElementById("suggestions");
     const searchText = searchBar.value.trim().toLowerCase();
 
-    // Clear previous suggestions
     suggestions.innerHTML = "";
 
     if (searchText === "") {
@@ -20,24 +19,21 @@ function filterTownlands() {
         return;
     }
 
-    // Filter townlands based on search text
     const filteredTownlands = townlands.filter(townland =>
         townland.toLowerCase().includes(searchText)
     );
 
     if (filteredTownlands.length > 0) {
-        // Display suggestions
         suggestions.style.display = "block";
-
-        // Add filtered townlands to the suggestions div
         filteredTownlands.forEach(townland => {
-            const rectangle = document.createElement("a"); // Use <a> for links
+            const rectangle = document.createElement("a");
             rectangle.className = "result-rectangle";
-            rectangle.textContent = toTitleCase(townland); // Convert to title case
-            rectangle.href = `/townlands/${encodeURIComponent(townland)}`; // Generate link
-            rectangle.style.display = "block"; // Ensure the link behaves like a block element
-            rectangle.style.textDecoration = "none"; // Remove underline
-            rectangle.style.color = "inherit"; // Inherit text color
+            rectangle.textContent = toTitleCase(townland);
+            rectangle.href = `/townlands/${encodeURIComponent(townland)}`; // Link generation
+            rectangle.style.display = "block";
+            rectangle.style.textDecoration = "none";
+            rectangle.style.color = "inherit";
+            rectangle.target = "_blank" // Open new tab on click
             suggestions.appendChild(rectangle);
         });
     } else {

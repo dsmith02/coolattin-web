@@ -6,6 +6,7 @@ import folium
 import pandas as pd
 
 json_data = None
+tenant_list = "static/data/tenants-merged-11_02_25.csv"
 
 # Loads the geographical JSON data for townlands
 def load_json_data():
@@ -56,6 +57,7 @@ def extract_townland_records(townland):
         as_attachment=True,
         download_name=f"{townland}_extracted.csv"
     )
+
 @app.route("/browse")
 def browse():
     return render_template("browse.html")
@@ -82,26 +84,26 @@ def create_map():
     for feature in json_data["features"]:
         name_english = feature["properties"]["TL_ENGLISH"]
         link = f'<a href="/townlands/{name_english.title()}" target="_blank">More details</a>'
-        feature["properties"]["TL_URL"] = link  # Add the link as a new property
+        feature["properties"]["TL_URL"] = link
 
     folium.GeoJson(
         json_data,
         name="Townlands",
         popup=folium.GeoJsonPopup(
-            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868", "TL_URL"],  # Display these properties
-            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):", ""],  # Labels
-            localize=True  # Automatically format numbers if needed
+            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868", "TL_URL"],
+            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):", ""],
+            localize=True
         ),
         tooltip=folium.GeoJsonTooltip(
-            fields=["TL_ENGLISH"],  # Show the townland name on hover
+            fields=["TL_ENGLISH"],
             aliases=["Townland:"],
             sticky=True
         ),
         style_function=lambda feature: {
-            "fillColor": "#7fd4db",  # Default fill color for polygons
-            "color": "black",  # Outline color
-            "weight": 1.5,  # Border thickness
-            "fillOpacity": 0.4  # Transparency of fill color
+            "fillColor": "#7fd4db",
+            "color": "black",
+            "weight": 1.5,
+            "fillOpacity": 0.4
         },
         zoom_on_click=False
     ).add_to(map)
@@ -185,6 +187,6 @@ def get_vrti_link(townland):
     return None
 
 def get_records_for_townland(townland):
-    records = pd.read_csv("static/data/tenants-merged-test.csv")
+    records = pd.read_csv(tenant_list)
     townland_records = records[records["townland"].str.strip().str.lower() == townland.lower()]
     return townland_records.to_dict(orient="records")
