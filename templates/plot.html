@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Population of {{ townland_name }}</h1>
+    <div id="population-chart"></div>
+    <script>
+        var graph = {{ graph_json | safe }};
+        Plotly.newPlot('population-chart', graph.data, graph.layout);
+    </script>
+</body>

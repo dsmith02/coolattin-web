@@ -4,8 +4,12 @@ import json
 from flask import Flask, render_template, send_file
 import folium
 import pandas as pd
+import plotly.graph_objs as go
+from population import CensusData
+import plotly
 
 json_data = None
+census = CensusData("static/data/wicklow-census-data.csv")
 tenant_list = "static/data/tenants-merged-11_02_25.csv"
 
 # Loads the geographical JSON data for townlands
@@ -41,7 +45,16 @@ def townland(name):
     if get_townland_geojson(name) is None:
         return render_template("townland_not_found.html", townland=name)
     else:
-        return render_template("townland.html", townland=name.title(), townland_vrti_link=get_vrti_link(name), tenancies=get_records_for_townland(name), map_html=create_map_by_townland(name)._repr_html_())
+        td = census.get_townland_data(name)
+        print(td)
+        val = td["1841 Male"]
+        print(td["1841 Male"][0])
+        return render_template("townland.html",
+                               townland=name.title(),
+                               townland_vrti_link=get_vrti_link(name),
+                               tenancies=get_records_for_townland(name),
+                               population=int(census.get_townland_data(name)["1841 Male"][0]),
+                               map_html=create_map_by_townland(name)._repr_html_())
 
 @app.route("/export/<townland>")
 def extract_townland_records(townland):
@@ -66,6 +79,14 @@ def browse():
 def about():
     return render_template("about.html")
 
+@app.route("/plot")
+def plot():
+    years = [1830, 1840, 1850, 1860, 1870]
+    populations = [120, 150, 100, 80, 60]  # Replace with real data
+    fig = go.Figure(data=[go.Bar(x=years, y=populations, marker=dict(color='blue'))])
+    fig.update_layout(title=f"Population of TEST Over Time", xaxis_title="Year", yaxis_title="Population")
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template("plot.html", graph_json=graph_json, townland_name="TEST")
 
 ########################
 ### HELPER FUNCTIONS ###

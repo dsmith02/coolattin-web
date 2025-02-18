@@ -9,7 +9,7 @@
             <a class="btn btn-link me-2 align-middle"
                href="{{ url_for('extract_townland_records', townland=townland) }}" target="_blank">CSV</a>
             <a class="btn btn-link align-middle" href="{{ townland_vrti_link }}" role="button" target="_blank">VRTI</a>
-            <p>The townland of {{ townland }}</p>
+            <p>The townland of {{ townland }} had a male population in 1841 of {{ population }}</p>
             <!-- CSV Export -->
         </div>
         <div class="col-md-6">
@@ -72,6 +72,7 @@
                     <td>{{ record["occupation"] }}</td>
                     <td>{{ record["townland"] }}</td>
                     <td>{{ record["acres_irish"] }}</td>
+                    <!-- Data below is passed to the modal to be displayed -->
                     <td><a data-acres-irish="{{ record['acres_irish'] }}"
                            data-age="{{ record['age'] }}"
                            data-bs-target="#recordModal"
@@ -92,6 +93,7 @@
                 </tbody>
             </table>
         </div>
+
         <!-- Modal -->
         <div aria-hidden="true" aria-labelledby="recordModalLabel" class="modal fade" id="recordModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
