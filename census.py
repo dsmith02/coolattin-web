@@ -1,5 +1,9 @@
 # For dealing with population data
+import json
+
 import pandas as pd
+import plotly.graph_objs as go
+import plotly
 
 class CensusData:
     def __init__(self, census_path):
@@ -65,6 +69,16 @@ class CensusData:
         }
 
         return pop_data
+
+    def generate_population_chart(self, townland):
+        data = self.get_townland_pops_combined(townland)
+        years = list(data.keys())
+        populations = list(data.values())
+        fig = go.Figure(data=[go.Bar(x=years, y=populations, marker=dict(color="yellow"))])
+        fig.update_layout(title=f"Population of {townland} over time", xaxis_title="Year", yaxis_title="Population")
+        graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        print(f"=============== Graph for {townland} generated successfully =============")
+        return graph_json
 
 if __name__ == '__main__':
     census_test = CensusData("static/data/wicklow-census-data.csv")
