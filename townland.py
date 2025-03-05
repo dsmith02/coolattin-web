@@ -9,6 +9,7 @@ class TownlandData:
         self.tenancies = pd.read_csv(tenancies_path)
         self.evictions = pd.read_csv(evictions_path)
         self.emigrations = pd.read_csv(emigrations_path)
+        self.official_list = pd.read_csv("static/data/official-aligned.csv")
         with open(json_path, encoding="utf-8") as f:
             self.geojson = json.load(f)
             for feature in self.geojson["features"]:
@@ -57,3 +58,9 @@ class TownlandData:
                 }
                 break
         return tl_geojson
+
+    def get_vrti_link(self, townland):
+        for index, row in self.official_list.iterrows():
+            if row.iloc[0] == townland:
+                return row.iloc[1]
+        return None

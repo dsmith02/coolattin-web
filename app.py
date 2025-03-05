@@ -6,39 +6,28 @@ import folium
 import pandas as pd
 from census import CensusData
 from townland import TownlandData
+from map import Maps
 
 json_data = None
 tenant_path = "static/data/tenants-merged-11_02_25.csv"
+tenant_list = "static/data/tenants-merged-11_02_25.csv"
 census = CensusData("static/data/wicklow-census-data.csv")
 townlands = TownlandData(tenant_path, tenant_path, tenant_path, "static/data/townlands.json")
-tenant_list = "static/data/tenants-merged-11_02_25.csv"
-
-# Loads the geographical JSON data for townlands
-def load_json_data():
-    global json_data
-    json_path = "static/data/townlands.json"
-    with open(json_path, encoding="utf-8") as f:
-        json_data = json.load(f)
-
-
+maps =  Maps("static/data/townlands.json")
 app = Flask(__name__)
-load_json_data()
-# Folium takes the latitude (y-axis) then the longitude (x-axis)
-COOLATTIN_COORDS = [52.7535, -6.4898]
-
 
 ##################
 ### APP ROUTES ###
 ##################
 @app.route("/")
 def index():
-    map = create_map()
+    map = maps.create_coolattin_map()
     map_html = map._repr_html_()
     return render_template("index.html", map_html=map_html)
 
 @app.route("/new")
 def new():
-    map = create_map()
+    map = maps.create_coolattin_map()
     map_html = map._repr_html_()
     return render_template("new.html", map_html=map_html)
 
@@ -48,7 +37,7 @@ Loads an individual townland's page. Checks that the townland is contained withi
 @app.route("/townlands/<name>")
 def townland(name):
     name = name.title()
-    if get_townland_geojson(name) is None:
+    if townlands.get_townland_geojson(name) is None:
         return render_template("townland_not_found.html", townland=name)
     else:
         td = census.get_townland_data(name)
@@ -57,11 +46,11 @@ def townland(name):
         print(td["1841 Male"][0])
         return render_template("townland.html",
                                townland=name.title(),
-                               townland_vrti_link=get_vrti_link(name),
+                               townland_vrti_link=townlands.get_vrti_link(name),
                                tenancies=get_records_for_townland(name),
                                pop_graph=census.generate_population_chart(name),
                                population=int(census.get_townland_data(name)["1841 Male"][0]),
-                               map_html=create_map_by_townland(name)._repr_html_())
+                               map_html=maps.create_map_by_townland(name)._repr_html_())
 
 @app.route("/export/<townland>")
 def extract_townland_records(townland):
@@ -91,116 +80,6 @@ def plot_test(townland):
 ########################
 ### HELPER FUNCTIONS ###
 ########################
-
-# Create map
-def create_map():
-    map = folium.Map(
-        location=COOLATTIN_COORDS,
-        prefer_canvas=True,
-        zoom_start=10)
-    map.width = 500;
-
-    folium.Marker(COOLATTIN_COORDS, popup="Coolattin House").add_to(map)
-
-    folium.GeoJson(
-        townlands.geojson,
-        name="Townlands",
-        popup=folium.GeoJsonPopup(
-            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868", "TL_URL"],
-            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):", ""],
-            localize=True
-        ),
-        tooltip=folium.GeoJsonTooltip(
-            fields=["TL_ENGLISH"],
-            aliases=["Townland:"],
-            sticky=True
-        ),
-        style_function=lambda feature: {
-            "fillColor": "#7fd4db",
-            "color": "black",
-            "weight": 1.5,
-            "fillOpacity": 0.4
-        },
-        zoom_on_click=False
-    ).add_to(map)
-
-    return map
-
-
-"""
-Gets the townlands geojson data
-"""
-def get_townland_geojson(townland_name):
-    tl_gjson = None
-    for x in json_data["features"]:
-        if x["properties"]["TL_ENGLISH"] == townland_name.upper():
-            tl_gjson = {
-                "type": "FeatureCollection",
-                "features": [x]
-            }
-    return tl_gjson
-
-
-def create_map_by_townland(townland_name):
-    tl_gjson = get_townland_geojson(townland_name)
-
-    if tl_gjson is None:
-        map = folium.Map(
-            location=COOLATTIN_COORDS,
-            prefer_canvas=True,
-            zoom_start=10)
-        map.width = 500
-        folium.Marker(COOLATTIN_COORDS, popup="Coolattin House").add_to(map)
-        return map
-
-    # Centroid = ( SUM OF X-VALUES / N, SUM OF Y-VALUES / N), where N = total number of vertices i.e. no. of X, Y pairs
-    # https://www.omnicalculator.com/math/centroid
-    # n = tl_gjson["features"][0]["geometry"]["coordinates"][0][0][0]
-    # print(f"N = {n}")
-    lon_sum = 0
-    lat_sum = 0
-    for coord in tl_gjson["features"][0]["geometry"]["coordinates"][0]:
-        lon_sum += coord[0]
-        lat_sum += coord[1]
-    centroid_x = lon_sum / len(tl_gjson["features"][0]["geometry"]["coordinates"][0])
-    centroid_y = lat_sum / len(tl_gjson["features"][0]["geometry"]["coordinates"][0])
-
-    map = folium.Map(
-        location=[centroid_y, centroid_x],
-        prefer_canvas=True,
-        zoom_start=12)
-    map.width = 500
-
-    folium.GeoJson(
-        tl_gjson,
-        name="Specific townland",
-        popup=folium.GeoJsonPopup(
-            fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868"],
-            aliases=["Townland (EN):", "Townland (GA):", "Population (1839):", "Population (1868):"],
-            localize=True
-        ),
-        tooltip=folium.GeoJsonTooltip(
-            fields=["TL_ENGLISH"],
-            aliases=["Townland:"],
-            sticky=True
-        ),
-        style_function=lambda feature: {
-            "fillColor": "#7fd4db",
-            "color": "black",
-            "weight": 1.5,
-            "fillOpacity": 0.4
-        },
-        zoom_on_click=False
-    ).add_to(map)
-    return map
-
-def get_vrti_link(townland):
-    townlands = pd.read_csv("static/data/official-aligned.csv")
-    for index, row in townlands.iterrows():
-        if row.iloc[0] == townland:
-            return row.iloc[1]
-    return None
-
 def get_records_for_townland(townland):
     records = pd.read_csv(tenant_list)
     townland_records = records[records["townland"].str.strip().str.lower() == townland.lower()]
