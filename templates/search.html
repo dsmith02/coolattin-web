@@ -1,0 +1,17 @@
+<html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Search</h1>
+    <div class="col">
+        <input class="form-control" id="search-bar" oninput=""
+               placeholder="Search the database for a record or townland"
+               style="height: 3rem; border-radius: 0;" type="text">
+        <div id="suggestions" style="display: none; padding: 0; margin-top: 1rem;">
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+</html>

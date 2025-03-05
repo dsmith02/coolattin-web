@@ -5,9 +5,12 @@ from flask import Flask, render_template, send_file
 import folium
 import pandas as pd
 from census import CensusData
+from townland import TownlandData
 
 json_data = None
+tenant_path = "static/data/tenants-merged-11_02_25.csv"
 census = CensusData("static/data/wicklow-census-data.csv")
+townlands = TownlandData(tenant_path, tenant_path, tenant_path, "static/data/townlands.json")
 tenant_list = "static/data/tenants-merged-11_02_25.csv"
 
 # Loads the geographical JSON data for townlands
@@ -62,17 +65,11 @@ def townland(name):
 
 @app.route("/export/<townland>")
 def extract_townland_records(townland):
-    df = pd.read_csv("static/data/tenants-merged-test.csv")
-    extracted_records = df[df["townland"].str.strip().str.lower() == townland.strip().lower()]
-
-    output = io.StringIO()
-    extracted_records.to_csv(output, index=False)
-
-    return send_file(
-        io.BytesIO(output.getvalue().encode()),  # Convert to bytes
+   return send_file(
+        io.BytesIO(townlands.extract_tenancies(townland)),  # Convert to bytes
         mimetype="text/csv",
         as_attachment=True,
-        download_name=f"{townland}_extracted.csv"
+        download_name=f"{townland}_tenancies_extracted.csv"
     )
 
 @app.route("/browse")
@@ -82,6 +79,10 @@ def browse():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+@app.route("/search")
+def search():
+    return render_template("search.html")
 
 @app.route("/plot/<townland>")
 def plot_test(townland):
@@ -101,13 +102,8 @@ def create_map():
 
     folium.Marker(COOLATTIN_COORDS, popup="Coolattin House").add_to(map)
 
-    for feature in json_data["features"]:
-        name_english = feature["properties"]["TL_ENGLISH"]
-        link = f'<a href="/townlands/{name_english.title()}" target="_blank">More details</a>'
-        feature["properties"]["TL_URL"] = link
-
     folium.GeoJson(
-        json_data,
+        townlands.geojson,
         name="Townlands",
         popup=folium.GeoJsonPopup(
             fields=["TL_ENGLISH", "TL_GAEILGE", "T_POP_1839_", "T_POP_1868", "TL_URL"],
@@ -196,7 +192,6 @@ def create_map_by_townland(townland_name):
         },
         zoom_on_click=False
     ).add_to(map)
-
     return map
 
 def get_vrti_link(townland):

@@ -1,4 +1,3 @@
-<html>
 {% extends "base.html" %}
 
 {% block content %}
@@ -15,31 +14,38 @@
             <div class="border border-dark border-2" id="map">
                 {{ map_html | safe }}
             </div>
+            <!-- Right-aligned button below the map -->
+            <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#populationModal">
+                    View Population Statistics
+                </button>
+            </div>
         </div>
     </div>
-    <!--    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>-->
-    <!--<div id="pop-chart"></div>-->
-    <!--<script>-->
-    <!--    var graph = {{ pop_graph | safe }};-->
-    <!--    Plotly.newPlot("pop-chart", graph.data, graph.layout);-->
-    <!--</script>-->
 
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
+        <!-- Tenanices tab -->
         <li class="nav-item" role="presentation">
             <a aria-controls="tenancies" aria-selected="true" class="nav-link active" data-bs-toggle="tab"
                href="#tenancies"
                id="tenancies-tab" role="tab">Tenancies</a>
         </li>
+
+        <!-- Evictions tab -->
         <li class="nav-item" role="presentation">
             <a aria-controls="evictions" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#evictions"
                id="evictions-tab" role="tab">Evictions</a>
         </li>
+
+        <!-- Emigrations tab -->
         <li class="nav-item" role="presentation">
             <a aria-controls="emigrations" aria-selected="false" class="nav-link" data-bs-toggle="tab"
                href="#emigrations"
                id="emigrations-tab" role="tab">Emigrations</a>
         </li>
+
+        <!-- Population tab -->
         <li class="nav-item" role="presentation">
             <a aria-controls="emigrations" aria-selected="false" class="nav-link" data-bs-toggle="tab"
                href="#populations"
@@ -50,14 +56,9 @@
 
     <!-- Data tables -->
     <div class="tab-content mt-3" id="myTabContent">
-        <!-- POPULATION TAB CONTENT -->
+         <!--POPULATION TAB CONTENT-->
         <div aria-labelledby="population-tab" class="tab-pane fade" id="populations" role="tabpanel">
-            <div id="pop-chart" style="width: 100%; height: 400px;"></div>
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-            <script>
-                var graph = {{ pop_graph | safe }};
-                Plotly.newPlot("pop-chart", graph.data, graph.layout);
-            </script>
+            <div id="pop-chart-tab" style="width: 100%; height: 400px;"></div>
         </div>
 
         <!-- TENANCIES TAB CONTENT -->
@@ -104,8 +105,7 @@
                            data-surname="{{ record['surname'] }}"
                            data-tenant-type="{{ record['tenant_type'] }}"
                            data-townland="{{ record['townland'] }}"
-                           href="#"
-                    >
+                           href="#">
                         View
                     </a></td>
                 </tr>
@@ -114,7 +114,7 @@
             </table>
         </div>
 
-        <!-- Modal -->
+        <!-- Record Modal -->
         <div aria-hidden="true" aria-labelledby="recordModalLabel" class="modal fade" id="recordModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -145,8 +145,40 @@
                 </div>
             </div>
         </div>
+
+        <!-- Population Statistics Modal -->
+        <div class="modal fade" id="populationModal" tabindex="-1" aria-labelledby="populationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="populationModalLabel">Population Statistics for {{ townland }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="pop-chart-modal" style="width: 100%; height: 500px;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+    var graph = {{ pop_graph | safe }};
+    document.addEventListener('DOMContentLoaded', function() {
+        Plotly.newPlot("pop-chart-tab", graph.data, graph.layout);
+        var modalChart = document.getElementById('populationModal');
+        modalChart.addEventListener('shown.bs.modal', function () {
+            Plotly.newPlot("pop-chart-modal", graph.data, graph.layout);
+        });
+    });
+</script>
+
 <script src="{{ url_for('static', filename='js/townland.js') }}"></script>
 {% endblock %}
 <!-- Bootstrap JS -->
@@ -154,4 +186,3 @@
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-</html>
