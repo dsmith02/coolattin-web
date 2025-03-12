@@ -153,7 +153,7 @@ class Maps:
 
         for feature in self.geojson["features"]:
             name = feature["properties"]["TL_ENGLISH"]
-            print(f"Checking {name}")
+            # print(f"Checking {name}")
             if self.townlands.get_evictions(name) is not None:
                 folium.GeoJson(
                     feature,
