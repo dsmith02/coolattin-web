@@ -18,24 +18,25 @@ class TownlandData:
                 feature["properties"]["TL_URL"] = link
 
     def get_tenancies(self, townland):
-        tenancies_data = self.tenancies[self.tenancies["townland"].str.lower() == townland.lower()]
+        tenancies_data = self.tenancies[self.tenancies["townland"].str.strip().str.lower() == townland.lower()]
 
         if tenancies_data is None:
             return None
 
-        return tenancies_data.reset_index(drop=True).to_dict()
+        return tenancies_data.reset_index(drop=True).to_dict(orient="records")
 
     def extract_tenancies(self, townland):
         extracted_records = self.tenancies[self.tenancies["townland"].str.strip().str.lower() == townland.strip().lower()]
         output = io.StringIO()
         extracted_records.to_csv(output, index=False)
-        return output.getvalue().encode()
+        return io.BytesIO(output.getvalue().encode())
 
 
     def get_evictions(self, townland):
         evictions_data = self.evictions[self.evictions["townland"].str.lower() == townland.lower()]
 
-        if evictions_data is None:
+        if evictions_data is None or townland.lower() == "Ballynultagh".lower():
+            print(f"NO EVICTIONS -> {townland}")
             return None
 
         return evictions_data.reset_index(drop=True).to_dict()
@@ -44,6 +45,7 @@ class TownlandData:
         emigrations_data = self.emigrations[self.emigrations["townland"].str.lower() == townland.lower()]
 
         if emigrations_data is None:
+            print(f"NO EMIGRATIONS -> {townland}")
             return None
 
         return emigrations_data.reset_index(drop=True).to_dict()
