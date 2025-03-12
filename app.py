@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_file
 from census import CensusData
 from townland import TownlandData
 from map import Maps
+import os
 
 json_data = None
 tenant_path = "static/data/tenants-merged-11_02_25.csv"
@@ -69,3 +70,7 @@ def search():
 @app.route("/plot/<townland>")
 def plot_test(townland):
     return render_template("plot.html", graph_json=census.generate_population_chart(townland), townland_name=townland)
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render assigns a dynamic port
+    app.run(host="0.0.0.0", port=port)
