@@ -1,0 +1,46 @@
+<html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 mb-4">
+    <div class="row mb-3">
+        <h1>Introduction</h1>
+        <p>This project aims to provide a geospatial perspective on the Coolattin Estate, a former collection of lands
+            held by the aristocratic Fitzwilliam family.
+            The Fitzwilliams were contemporaneously progressive and kept detailed records of the tenancies held on their
+            estates. They also kept records of evictions
+            and assisted emigrations that occurred extensively during the famine.</p>
+    </div>
+    <hr>
+    <div class="row mb-3">
+        <h1>Map</h1>
+    </div>
+
+    <div class="row mt-3">
+        <!-- Map -->
+        <div class="col-md-8">
+            <div class="border border-dark border-2" id="map" style="height: 600px;">
+                {{ map_html | safe }}
+            </div>
+        </div>
+
+        <!-- Search w suggestions -->
+        <div class="col-md-4">
+            <input class="form-control" id="search-bar" oninput="filterTownlands()" placeholder="Search for a townland..."
+                   style="height: 3rem; border-radius: 0;" type="text">
+            <div id="suggestions" style="display: none; padding: 0; margin-top: 1rem;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="static/js/index.js"></script>
+
+{% endblock %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</html>
