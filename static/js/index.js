@@ -46,3 +46,32 @@ function toTitleCase(string) {
         word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
     );
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const legend = document.getElementById("legend");
+    if (legend) {
+        legend.style.display = "none";
+    }
+    function toggleLegend() {
+        const tenanciesLayer = document.querySelector(".leaflet-control-layers-selector[name=\"Tenancies Heat Map\"]");
+        const evictionsLayer = document.querySelector(".leaflet-control-layers-selector[name=\"Evictions Heat Map\"]");
+        const emigrationsLayer = document.querySelector(".leaflet-control-layers-selector[name=\"Emigrations Heat Map\"]");
+        const townlandsLayer = document.querySelector(".leaflet-control-layers-selector[name=\"Townlands\"]");
+        const isHeatmapActive =
+            (tenanciesLayer && tenanciesLayer.checked) ||
+            (evictionsLayer && evictionsLayer.checked) ||
+            (emigrationsLayer && emigrationsLayer.checked);
+        if (legend) {
+            if (isHeatmapActive) {
+                legend.style.display = "block";
+            } else {
+                legend.style.display = "none";
+            }
+        }
+    }
+    const layerControls = document.querySelectorAll(".leaflet-control-layers-selector");
+    layerControls.forEach(control => {
+        control.addEventListener("change", toggleLegend);
+    });
+    toggleLegend();
+});

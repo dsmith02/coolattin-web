@@ -17,7 +17,6 @@ class CensusData:
         if townland_data is None:
             return None
 
-        print(townland_data)
         return townland_data.reset_index(drop=True).to_dict()
 
     # Gets population of males in a townland and returns as a dictionary
@@ -82,7 +81,6 @@ class CensusData:
         fig = go.Figure(data=[go.Bar(x=years, y=populations, marker=dict(color="yellow"))])
         fig.update_layout(title=f"Population of {townland} over time", xaxis_title="Year", yaxis_title="Population")
         graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-        print(f"=============== Graph for {townland} generated successfully =============")
         return graph_json
 
 # Local testing methods

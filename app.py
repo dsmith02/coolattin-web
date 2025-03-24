@@ -5,9 +5,9 @@ from map import Maps
 import os
 
 json_data = None
-tenant_path = "static/data/tenants-merged-11_02_25.csv"
-evictions_path = "static/data/evictions.csv"
-emigrations_path = "static/data/emigrations.csv"
+tenant_path = "static/data/final/tenancies.csv"
+evictions_path = "static/data/final/evictions.csv"
+emigrations_path = "static/data/final/emigrations.csv"
 tenant_list = "static/data/tenants-merged-11_02_25.csv"
 census = CensusData("static/data/wicklow-census-data.csv")
 townlands = TownlandData(tenant_path, evictions_path, emigrations_path, "static/data/townlands.json")
@@ -19,13 +19,13 @@ app = Flask(__name__)
 ##################
 @app.route("/")
 def index():
-    map = maps.create_coolattin_map()
+    map = maps.create_map_with_heatmap()
     map_html = map._repr_html_()
     return render_template("index.html", map_html=map_html)
 
 @app.route("/new")
 def new():
-    map = maps.new_create_coolattin_map()
+    map = maps.create_map_with_heatmap()
     map_html = map._repr_html_()
     return render_template("new.html", map_html=map_html)
 
@@ -38,10 +38,13 @@ def townland(name):
     if townlands.get_townland_geojson(name) is None:
         return render_template("townland_not_found.html", townland=name)
     else:
+        print(f"LEN FOR {name}\nEvictions length {len(townlands.get_evictions(name))}\nEmigrations length {len(townlands.get_emigrations(name))}")
         return render_template("townland.html",
                                townland=name.title(),
                                townland_vrti_link=townlands.get_vrti_link(name),
                                tenancies=townlands.get_tenancies(name),
+                               evictions=townlands.get_evictions(name),
+                               emigrations=townlands.get_emigrations(name),
                                pop_graph=census.generate_population_chart(name),
                                population=int(census.get_townland_data(name)["1841 Male"][0]),
                                map_html=maps.create_map_by_townland(name)._repr_html_())

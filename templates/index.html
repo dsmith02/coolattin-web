@@ -26,7 +26,8 @@
 
         <!-- Search w suggestions -->
         <div class="col-md-4">
-            <input class="form-control" id="search-bar" oninput="filterTownlands()" placeholder="Search for a townland..."
+            <input class="form-control" id="search-bar" oninput="filterTownlands()"
+                   placeholder="Search for a townland..."
                    style="height: 3rem; border-radius: 0;" type="text">
             <div id="suggestions" style="display: none; padding: 0; margin-top: 1rem;">
             </div>
@@ -35,6 +36,28 @@
 </div>
 
 <script src="static/js/index.js"></script>
+<script>
+    function toggleLegend() {
+        var legend = document.getElementById("legend");
+        var tenancies = document.querySelector("input[title='Tenancies Heat Map']");
+        var evictions = document.querySelector("input[title='Evictions Heat Map']");
+        var emigrations = document.querySelector("input[title='Emigrations Heat Map']");
+
+        function updateLegend() {
+            if (tenancies.checked || evictions.checked || emigrations.checked) {
+                legend.style.display = "block";
+            } else {
+                legend.style.display = "none";
+            }
+        }
+
+        tenancies.addEventListener("change", updateLegend);
+        evictions.addEventListener("change", updateLegend);
+        emigrations.addEventListener("change", updateLegend);
+    }
+
+    document.addEventListener("DOMContentLoaded", toggleLegend);
+</script>
 
 {% endblock %}
 

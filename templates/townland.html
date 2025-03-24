@@ -8,7 +8,10 @@
             <a class="btn btn-link me-2 align-middle"
                href="{{ url_for('extract_townland_records', townland=townland) }}" target="_blank">CSV</a>
             <a class="btn btn-link align-middle" href="{{ townland_vrti_link }}" role="button" target="_blank">VRTI</a>
-            <p>The townland of {{ townland }} had a male population in 1841 of {{ population }}</p>
+            <!--<p>The townland of {{ townland }} had a male population in 1841 of {{ population }}</p>-->
+            <div class="alert alert-info">
+        Number of eviction records: {{ evictions|length if evictions else 0 }}<br>Number of emigration records: {{ emigrations|length if emigrations else 0 }}<br>Number of teancy records: {{ tenancies|length if tenancies else 0 }}
+    </div>
         </div>
         <div class="col-md-6">
             <div class="border border-dark border-2" id="map">
@@ -16,7 +19,7 @@
             </div>
             <!-- Right-aligned button below the map -->
             <div class="d-flex justify-content-end mt-2">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#populationModal">
+                <button class="btn btn-primary" data-bs-target="#populationModal" data-bs-toggle="modal">
                     View Population Statistics
                 </button>
             </div>
@@ -24,39 +27,47 @@
     </div>
 
     <!-- Tab Navigation -->
-    <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
-        <!-- Tenanices tab -->
-        <li class="nav-item" role="presentation">
-            <a aria-controls="tenancies" aria-selected="true" class="nav-link active" data-bs-toggle="tab"
-               href="#tenancies"
-               id="tenancies-tab" role="tab">Tenancies</a>
-        </li>
+<ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
+    <!-- Tenancies tab -->
+    <li class="nav-item" role="presentation">
+        <a aria-controls="tenancies" aria-selected="true" class="nav-link active" data-bs-toggle="tab"
+           href="#tenancies"
+           id="tenancies-tab" role="tab">Tenancies ({{ tenancies|length if tenancies else 0 }})</a>
+    </li>
 
-        <!-- Evictions tab -->
-        <li class="nav-item" role="presentation">
-            <a aria-controls="evictions" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#evictions"
-               id="evictions-tab" role="tab">Evictions</a>
-        </li>
+    <!-- Evictions tab -->
+    <li class="nav-item" role="presentation">
+        <a aria-controls="evictions" aria-selected="false"
+           class="nav-link {% if not evictions or evictions|length == 0 %}disabled{% endif %}"
+           data-bs-toggle="{% if evictions and evictions|length > 0 %}tab{% endif %}"
+           href="#evictions"
+           id="evictions-tab" role="tab"
+           {% if not evictions or evictions|length == 0 %}tabindex="-1" aria-disabled="true"{% endif %}
+           >Evictions ({{ evictions|length if evictions else 0 }})</a>
+    </li>
 
-        <!-- Emigrations tab -->
-        <li class="nav-item" role="presentation">
-            <a aria-controls="emigrations" aria-selected="false" class="nav-link" data-bs-toggle="tab"
-               href="#emigrations"
-               id="emigrations-tab" role="tab">Emigrations</a>
-        </li>
+    <!-- Emigrations tab -->
+    <li class="nav-item" role="presentation">
+        <a aria-controls="emigrations" aria-selected="false"
+           class="nav-link {% if not emigrations or emigrations|length == 0 %}disabled{% endif %}"
+           data-bs-toggle="{% if emigrations and emigrations|length > 0 %}tab{% endif %}"
+           href="#emigrations"
+           id="emigrations-tab" role="tab"
+           {% if not emigrations or emigrations|length == 0 %}tabindex="-1" aria-disabled="true"{% endif %}"
+           >Emigrations ({{ emigrations|length if emigrations else 0 }})</a>
+    </li>
 
-        <!-- Population tab -->
-        <li class="nav-item" role="presentation">
-            <a aria-controls="emigrations" aria-selected="false" class="nav-link" data-bs-toggle="tab"
-               href="#populations"
-               id="population-tab" role="tab">Population</a>
-        </li>
-    </ul>
-
+    <!-- Population tab
+    <li class="nav-item" role="presentation">
+        <a aria-controls="populations" aria-selected="false" class="nav-link" data-bs-toggle="tab"
+           href="#populations"
+           id="population-tab" role="tab">Population</a>
+    </li>-->
+</ul>
 
     <!-- Data tables -->
     <div class="tab-content mt-3" id="myTabContent">
-         <!--POPULATION TAB CONTENT-->
+        <!--POPULATION TAB CONTENT-->
         <div aria-labelledby="population-tab" class="tab-pane fade" id="populations" role="tabpanel">
             <div id="pop-chart-tab" style="width: 100%; height: 400px;"></div>
         </div>
@@ -87,24 +98,25 @@
                 {% for record in tenancies %}
                 <tr>
                     <!-- Visible columns -->
-                    <td>{{ record["forename"] }}</td>
-                    <td>{{ record["surname"] }}</td>
-                    <td>{{ record["age"] }}</td>
-                    <td>{{ record["occupation"] }}</td>
-                    <td>{{ record["townland"] }}</td>
-                    <td>{{ record["acres_irish"] }}</td>
+                    <td>{{ record["forename"] if record["forename"] and record["forename"]|string != "nan" else "" }}</td>
+                    <td>{{ record["surname"] if record["surname"] and record["surname"]|string != "nan" else "" }}</td>
+                    <td>{{ record["age"] if record["age"] and record["age"]|string != "nan" else "" }}</td>
+                    <td>{{ record["occupation"] if record["occupation"] and record["occupation"]|string != "nan" else "" }}</td>
+                    <td>{{ record["townland"] if record["townland"] and record["townland"]|string != "nan" else "" }}</td>
+                    <td>{{ record["acres_irish"] if record["acres_irish"] and record["acres_irish"]|string != "nan" else "" }}</td>
                     <!-- Data below is passed to the modal to be displayed -->
-                    <td><a data-acres-irish="{{ record['acres_irish'] }}"
-                           data-age="{{ record['age'] }}"
+                    <td><a data-acres-irish="{{ record['acres_irish'] if record['acres_irish'] and record['acres_irish']|string != 'nan' else '' }}"
+                           data-age="{{ record['age'] if record['age'] and record['age']|string != 'nan' else '' }}"
                            data-bs-target="#recordModal"
                            data-bs-toggle="modal"
-                           data-forename="{{ record['forename'] }}"
-                           data-id="{{ record['id'] }}"
-                           data-nli-ref="{{ record['nli_ref'] }}"
-                           data-occupation="{{ record['occupation'] }}"
-                           data-surname="{{ record['surname'] }}"
-                           data-tenant-type="{{ record['tenant_type'] }}"
-                           data-townland="{{ record['townland'] }}"
+                           data-forename="{{ record['forename'] if record['forename'] and record['forename']|string != 'nan' else '' }}"
+                           data-id="{{ record['id'] if record['id'] and record['id']|string != 'nan' else '' }}"
+                           data-nli-ref="{{ record['nli_ref'] if record['nli_ref'] and record['nli_ref']|string != 'nan' else '' }}"
+                           data-occupation="{{ record['occupation'] if record['occupation'] and record['occupation']|string != 'nan' else '' }}"
+                           data-surname="{{ record['surname'] if record['surname'] and record['surname']|string != 'nan' else '' }}"
+                           data-tenant-type="{{ record['tenant_type'] if record['tenant_type'] and record['tenant_type']|string != 'nan' else '' }}"
+                           data-townland="{{ record['townland'] if record['townland'] and record['townland']|string != 'nan' else '' }}"
+                           data-other-townland="{{ record['townland2'] if record['townland2'] and record['townland2']|string !='0'  else 'None' }}"
                            href="#">
                         View
                     </a></td>
@@ -114,66 +126,161 @@
             </table>
         </div>
 
-        <!-- Record Modal -->
-        <div aria-hidden="true" aria-labelledby="recordModalLabel" class="modal fade" id="recordModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="recordModalLabel">Record Details</h5>
-                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>ID:</strong> <span id="modal-id"></span></p>
-                                <p><strong>NLI Reference:</strong> <span id="modal-nli-ref"></span></p>
-                                <p><strong>Forename:</strong> <span id="modal-forename"></span></p>
-                                <p><strong>Surname:</strong> <span id="modal-surname"></span></p>
-                                <p><strong>Age:</strong> <span id="modal-age"></span></p>
-                                <p><strong>Occupation:</strong> <span id="modal-occupation"></span></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Townland:</strong> <span id="modal-townland"></span></p>
-                                <p><strong>Acres (IE):</strong> <span id="modal-acres-irish"></span></p>
-                                <p><strong>Type:</strong></p> <span id="modal-tenant-type"></span></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                    </div>
-                </div>
-            </div>
+        <!-- EVICTIONS TAB CONTENT -->
+        <div aria-labelledby="evictions-tab" class="tab-pane fade" id="evictions" role="tabpanel">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <!-- Visible columns -->
+                    <th>Forename</th>
+                    <th>Surname</th>
+                    <th>Eviction Type</th>
+                    <th>Occupation</th>
+                    <th>Townland</th>
+                    <th>Acres (IE)</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in evictions %}
+                <tr>
+                    <!-- Visible columns -->
+                    <td>{{ record["forename"] if record["forename"] and record["forename"]|string != "nan" else "" }}</td>
+                    <td>{{ record["surname"] if record["surname"] and record["surname"]|string != "nan" else "" }}</td>
+                    <td>{{ record["tenant_type"] if record["tenant_type"] and record["tenant_type"]|string != "nan" else "" }}</td>
+                    <td>{{ record["occupation"] if record["occupation"] and record["occupation"]|string != "nan" else "" }}</td>
+                    <td>{{ record["townland"] if record["townland"] and record["townland"]|string != "nan" else "" }}</td>
+                    <td>{{ record["acres_irish"] if record["acres_irish"] and record["acres_irish"]|string != "nan" else "" }}</td>
+                    <!-- Data below is passed to the modal to be displayed -->
+                    <td><a data-acres-irish="{{ record['acres_irish'] if record['acres_irish'] and record['acres_irish']|string != 'nan' else '' }}"
+                           data-age="{{ record['age'] if record['age'] and record['age']|string != 'nan' else '' }}"
+                           data-bs-target="#recordModal"
+                           data-bs-toggle="modal"
+                           data-forename="{{ record['forename'] if record['forename'] and record['forename']|string != 'nan' else '' }}"
+                           data-id="{{ record['id'] if record['id'] and record['id']|string != 'nan' else '' }}"
+                           data-nli-ref="{{ record['nli_ref'] if record['nli_ref'] and record['nli_ref']|string != 'nan' else '' }}"
+                           data-occupation="{{ record['occupation'] if record['occupation'] and record['occupation']|string != 'nan' else '' }}"
+                           data-surname="{{ record['surname'] if record['surname'] and record['surname']|string != 'nan' else '' }}"
+                           data-tenant-type="{{ record['tenant_type'] if record['tenant_type'] and record['tenant_type']|string != 'nan' else '' }}"
+                           data-townland="{{ record['townland'] if record['townland'] and record['townland']|string != 'nan' else '' }}"
+                           href="#">
+                        View
+                    </a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <!-- Population Statistics Modal -->
-        <div class="modal fade" id="populationModal" tabindex="-1" aria-labelledby="populationModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="populationModalLabel">Population Statistics for {{ townland }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- EMIGRATIONS TAB CONTENT -->
+        <div aria-labelledby="emigrations-tab" class="tab-pane fade" id="emigrations" role="tabpanel">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <!-- Visible columns -->
+                    <th>Forename</th>
+                    <th>Surname</th>
+                    <th>Departed</th>
+                    <th>Arrived</th>
+                    <th>Townland</th>
+                    <th>Acres (IE)</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in emigrations %}
+                <tr>
+                    <!-- Visible columns -->
+                    <td>{{ record["forename"] if record["forename"] and record["forename"]|string != "nan" else "" }}</td>
+                    <td>{{ record["surname"] if record["surname"] and record["surname"]|string != "nan" else "" }}</td>
+                    <td>{{ record["place_date_departure"] if record["place_date_departure"] and record["place_date_departure"]|string != "nan" else "" }}</td>
+                    <td>{{ record["place_date_arrival"] if record["place_date_arrival"] and record["place_date_arrival"]|string != "nan" else "" }}</td>
+                    <td>{{ record["townland"] if record["townland"] and record["townland"]|string != "nan" else "" }}</td>
+                    <td>{{ record["acres_irish"] if record["acres_irish"] and record["acres_irish"]|string != "nan" else "" }}</td>
+                    <!-- Data below is passed to the modal to be displayed -->
+                    <td><a data-acres-irish="{{ record['acres_irish'] if record['acres_irish'] and record['acres_irish']|string != 'nan' else '' }}"
+                           data-age="{{ record['age'] if record['age'] and record['age']|string != 'nan' else '' }}"
+                           data-bs-target="#recordModal"
+                           data-bs-toggle="modal"
+                           data-forename="{{ record['forename'] if record['forename'] and record['forename']|string != 'nan' else '' }}"
+                           data-id="{{ record['id'] if record['id'] and record['id']|string != 'nan' else '' }}"
+                           data-nli-ref="{{ record['nli_ref'] if record['nli_ref'] and record['nli_ref']|string != 'nan' else '' }}"
+                           data-occupation="{{ record['occupation'] if record['occupation'] and record['occupation']|string != 'nan' else '' }}"
+                           data-surname="{{ record['surname'] if record['surname'] and record['surname']|string != 'nan' else '' }}"
+                           data-tenant-type="{{ record['tenant_type'] if record['tenant_type'] and record['tenant_type']|string != 'nan' else '' }}"
+                           data-townland="{{ record['townland'] if record['townland'] and record['townland']|string != 'nan' else '' }}"
+                           href="#">
+                        View
+                    </a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Record Modal -->
+    <div aria-hidden="true" aria-labelledby="recordModalLabel" class="modal fade" id="recordModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recordModalLabel">Record Details</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> <span id="modal-id"></span></p>
+                            <p><strong>NLI Reference:</strong> <span id="modal-nli-ref"></span></p>
+                            <p><strong>Forename:</strong> <span id="modal-forename"></span></p>
+                            <p><strong>Surname:</strong> <span id="modal-surname"></span></p>
+                            <p><strong>Age:</strong> <span id="modal-age"></span></p>
+                            <p><strong>Occupation:</strong> <span id="modal-occupation"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Townland:</strong> <span id="modal-townland"></span></p>
+                            <p><strong>Acres (IE):</strong> <span id="modal-acres-irish"></span></p>
+                            <p><strong>Type:</strong></p> <span id="modal-tenant-type"></span></p>
+                            <p><strong>Listed in other townlands:</strong> <span id="modal-othertownland"</p>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <div id="pop-chart-modal" style="width: 100%; height: 500px;"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Population Statistics Modal -->
+    <div aria-hidden="true" aria-labelledby="populationModalLabel" class="modal fade" id="populationModal"
+         tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="populationModalLabel">Population Statistics for {{ townland }}</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="pop-chart-modal" style="width: 100%; height: 500px;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 <script>
     var graph = {{ pop_graph | safe }};
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function () {
         Plotly.newPlot("pop-chart-tab", graph.data, graph.layout);
-        var modalChart = document.getElementById('populationModal');
-        modalChart.addEventListener('shown.bs.modal', function () {
+        var modalChart = document.getElementById("populationModal");
+        modalChart.addEventListener("shown.bs.modal", function () {
             Plotly.newPlot("pop-chart-modal", graph.data, graph.layout);
         });
     });

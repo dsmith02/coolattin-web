@@ -37,7 +37,8 @@ recordModal.addEventListener("show.bs.modal", function (event) {
         occupation: link.getAttribute("data-occupation"),
         townland: link.getAttribute("data-townland"),
         acres_irish: link.getAttribute("data-acres-irish"),
-        tenant_type: link.getAttribute("data-tenant-type")
+        tenant_type: link.getAttribute("data-tenant-type"),
+        other_townland: link.getAttribute("data-other-townland")
     };
 
     document.getElementById("modal-id").textContent = checkNan(record.id);
@@ -49,8 +50,10 @@ recordModal.addEventListener("show.bs.modal", function (event) {
     document.getElementById("modal-townland").textContent = checkNan(record.townland);
     document.getElementById("modal-acres-irish").textContent = checkNan(record.acres_irish);
     document.getElementById("modal-tenant-type").textContent = checkNan(record.tenant_type);
+    document.getElementById("modal-othertownland").textContent = checkNan(record.other_townland)
 });
 
 function checkNan(val) {
     return val === "nan" ? "NA" : val;
 }
+
